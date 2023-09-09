@@ -31,8 +31,7 @@ import {
   FiChevronDown,
 } from 'react-icons/fi'
 import { IconType } from 'react-icons'
-import { Outlet } from 'react-router-dom'
-
+import { Outlet, useNavigate } from 'react-router-dom'
 interface LinkItemProps {
   name: string
   icon: IconType
@@ -42,6 +41,7 @@ interface LinkItemProps {
 
 interface NavItemProps extends FlexProps {
   icon: IconType
+  path?: string
   children: React.ReactNode
 }
 
@@ -53,11 +53,34 @@ interface SidebarProps extends BoxProps {
   onClose: () => void
 }
 
+// get only first path
+const path = '/' + window.location.pathname.split('/')[1]
+console.log(path)
 const LinkItems: Array<LinkItemProps> = [
-  { name: 'Dashboard', icon: FiHome, path: '/', active: true },
-  { name: 'Cartões', icon: FiTrendingUp },
-  { name: 'Clientes', icon: FiCompass },
-  { name: 'Configurações', icon: FiSettings },
+  {
+    name: 'Dashboard',
+    icon: FiHome,
+    path: '/',
+    active: path === '/',
+  },
+  {
+    name: 'Cartões',
+    icon: FiTrendingUp,
+    path: '/cards',
+    active: path === '/cards',
+  },
+  {
+    name: 'Clientes',
+    icon: FiCompass,
+    path: '/customers',
+    active: path === '/customers',
+  },
+  {
+    name: 'Configurações',
+    icon: FiSettings,
+    path: '/settings',
+    active: path === '/settings',
+  },
 ]
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
@@ -70,20 +93,19 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       w={{ base: 'full', md: 60 }}
       pos="fixed"
       h="full"
-      {...rest}>
+      {...rest}
+    >
       <Flex h="60" alignItems="center" mx="8" justifyContent="space-between">
         <Image
           alt={'Login Image'}
           objectFit={'cover'}
-          src={
-            './logo.png'
-          }
+          src={'./logo.png'}
           w={40}
         />
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon}>
+        <NavItem key={link.name} icon={link.icon} path={link.path}>
           {link.name}
         </NavItem>
       ))}
@@ -91,13 +113,15 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
   )
 }
 
-const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
+const NavItem = ({ icon, children, path, ...rest }: NavItemProps) => {
+  const navigate = useNavigate()
   return (
     <Box
       as="a"
-      href="#"
+      onClick={() => navigate(path || '/')}
       style={{ textDecoration: 'none' }}
-      _focus={{ boxShadow: 'none' }}>
+      _focus={{ boxShadow: 'none' }}
+    >
       <Flex
         align="center"
         p="4"
@@ -109,7 +133,8 @@ const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
           bg: 'yellow.500',
           color: 'gray.900',
         }}
-        {...rest}>
+        {...rest}
+      >
         {icon && (
           <Icon
             mr="4"
@@ -138,7 +163,8 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       color={useColorModeValue('gray.100', 'gray.100')}
       borderBottomColor={useColorModeValue('gray.800', 'gray.700')}
       justifyContent={{ base: 'space-between', md: 'flex-end' }}
-      {...rest}>
+      {...rest}
+    >
       <IconButton
         display={{ base: 'flex', md: 'none' }}
         onClick={onOpen}
@@ -152,15 +178,26 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         display={{ base: 'flex', md: 'none' }}
         fontSize="2xl"
         fontFamily="monospace"
-        fontWeight="bold">
+        fontWeight="bold"
+      >
         Logo
       </Text>
 
       <HStack spacing={{ base: '0', md: '6' }}>
-        <IconButton size="lg" variant="ghost" aria-label="open menu" icon={<FiBell />} color={useColorModeValue('gray.100', 'gray.100')} />
+        <IconButton
+          size="lg"
+          variant="ghost"
+          aria-label="open menu"
+          icon={<FiBell />}
+          color={useColorModeValue('gray.100', 'gray.100')}
+        />
         <Flex alignItems={'center'}>
           <Menu>
-            <MenuButton py={2} transition="all 0.3s" _focus={{ boxShadow: 'none' }}>
+            <MenuButton
+              py={2}
+              transition="all 0.3s"
+              _focus={{ boxShadow: 'none' }}
+            >
               <HStack>
                 <Avatar
                   size={'sm'}
@@ -172,7 +209,8 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
                   display={{ base: 'none', md: 'flex' }}
                   alignItems="flex-start"
                   spacing="1px"
-                  ml="2">
+                  ml="2"
+                >
                   <Text fontSize="sm">Justina Clark</Text>
                   <Text fontSize="xs" color="gray.600">
                     Admin
@@ -185,7 +223,8 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
             </MenuButton>
             <MenuList
               bg={useColorModeValue('white', 'gray.900')}
-              borderColor={useColorModeValue('gray.200', 'gray.700')}>
+              borderColor={useColorModeValue('gray.200', 'gray.700')}
+            >
               <MenuItem>Profile</MenuItem>
               <MenuItem>Settings</MenuItem>
               <MenuItem>Billing</MenuItem>
@@ -204,14 +243,18 @@ const SidebarWithHeader = () => {
 
   return (
     <Box minH="100vh" bg={useColorModeValue('gray.900', 'gray.700')}>
-      <SidebarContent onClose={() => onClose} display={{ base: 'none', md: 'block' }} />
+      <SidebarContent
+        onClose={() => onClose}
+        display={{ base: 'none', md: 'block' }}
+      />
       <Drawer
         isOpen={isOpen}
         placement="left"
         onClose={onClose}
         returnFocusOnClose={false}
         onOverlayClick={onClose}
-        size="full">
+        size="full"
+      >
         <DrawerContent>
           <SidebarContent onClose={onClose} />
         </DrawerContent>
