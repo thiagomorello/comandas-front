@@ -4,6 +4,10 @@ import {
   Flex,
   Heading,
   Icon,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Table,
   TableContainer,
   Tbody,
@@ -14,10 +18,36 @@ import {
   Tr,
 } from '@chakra-ui/react'
 import { BiSolidUserPin } from 'react-icons/bi'
+import { BsChevronCompactDown } from 'react-icons/bs'
 import { useCustomer } from '../../contexts/CustomerContext'
 import { CreateCustomer } from './CreateCustomer'
+import { useEffect, useState } from 'react'
+
+type Customer = {
+  id: number
+  fullName: string
+  email: string
+  phone: string
+}
+
 export function ListCustomers() {
-  const { customers } = useCustomer()
+  const { customers, deleteCustomer } = useCustomer()
+  const [customer, setCustomer] = useState<Customer>()
+
+  function handleEditCustomer(customer: Customer) {
+    setCustomer(customer)
+  }
+  useEffect(() => {
+    if (customer?.fullName) {
+      const event = new KeyboardEvent('keydown', { key: 'F5' })
+      document.dispatchEvent(event)
+    }
+  }, [customer])
+
+  function onCloseCreateCustomerModal() {
+    setCustomer(undefined)
+  }
+
   return (
     <>
       <Box
@@ -89,9 +119,7 @@ export function ListCustomers() {
                   borderBottom={'1px'}
                   borderColor={'gray.700'}
                   textAlign={'left'}
-                >
-                  Ação
-                </Th>
+                ></Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -105,14 +133,55 @@ export function ListCustomers() {
                   <Td isNumeric borderColor={'gray.700'}>
                     {customer.phone}
                   </Td>
-                  <Td borderColor={'gray.700'}>aqui vai dropdown</Td>
+                  <Td borderColor={'gray.700'}>
+                    <Menu>
+                      <MenuButton
+                        as={Button}
+                        colorScheme="blue"
+                        rightIcon={<BsChevronCompactDown />}
+                      >
+                        Ações
+                      </MenuButton>
+                      <MenuList bg={'gray.600'} borderColor={'gray.700'}>
+                        <MenuItem
+                          bg={'gray.600'}
+                          _hover={{
+                            bg: {
+                              base: 'gray.700',
+                            },
+                          }}
+                          onClick={() => {
+                            handleEditCustomer(customer)
+                          }}
+                        >
+                          Editar
+                        </MenuItem>
+                        <MenuItem
+                          bg={'gray.600'}
+                          _hover={{
+                            bg: {
+                              base: 'gray.700',
+                            },
+                          }}
+                          onClick={() => {
+                            deleteCustomer(customer.id)
+                          }}
+                        >
+                          Excluir
+                        </MenuItem>
+                      </MenuList>
+                    </Menu>
+                  </Td>
                 </Tr>
               ))}
             </Tbody>
           </Table>
         </TableContainer>
       </Box>
-      <CreateCustomer />
+      <CreateCustomer
+        customer={customer}
+        onClose={onCloseCreateCustomerModal}
+      />
     </>
   )
 }

@@ -26,12 +26,13 @@ type Customer = {
 
 interface CreateCustomerProps {
   customer?: Customer
+  onClose?: () => void
 }
 interface Error {
   message: string
 }
 
-export function CreateCustomer({ customer }: CreateCustomerProps) {
+export function CreateCustomer({ customer, onClose }: CreateCustomerProps) {
   const [fullName, setFullName] = useState(customer?.fullName || '')
   const [email, setEmail] = useState(customer?.email || '')
   const [phone, setPhone] = useState(customer?.phone || '')
@@ -57,21 +58,43 @@ export function CreateCustomer({ customer }: CreateCustomerProps) {
         ) as HTMLButtonElement
         submitButton.click()
       }
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onCloseCreateCustomerModal?.()
+      }
     })
   }, [])
 
+  useEffect(() => {
+    if (customer) {
+      setFullName(customer.fullName)
+      setEmail(customer.email)
+      setPhone(customer.phone)
+    } else {
+      setFullName('')
+      setEmail('')
+      setPhone('')
+    }
+  }, [customer])
+
   function onCloseCreateCustomerModal() {
     setIsCreateCustomerModalOpen(false)
+    onClose?.()
   }
 
   const handleSubmit = () => {
-    if (customer) {
-      updateCustomer({ id: customer.id, fullName, email, phone })
+    if (!fullName || fullName === '') {
+      setErrorMsg({ message: 'Nome é obrigatório' })
+    } else if (!phone || phone === '') {
+      setErrorMsg({ message: 'Telefone é obrigatório' })
     } else {
-      if (!fullName || fullName === '') {
-        setErrorMsg({ message: 'Nome é obrigatório' })
-      } else if (!phone || phone === '') {
-        setErrorMsg({ message: 'Telefone é obrigatório' })
+      if (customer) {
+        setErrorMsg(undefined)
+        updateCustomer({ id: customer.id, fullName, email, phone })
+        setFullName('')
+        setEmail('')
+        setPhone('')
+        onCloseCreateCustomerModal?.()
       } else {
         setErrorMsg(undefined)
         addCustomer({ fullName, email, phone })
@@ -164,9 +187,16 @@ export function CreateCustomer({ customer }: CreateCustomerProps) {
               }}
               mr={3}
             >
-              Cadastrar
+              Cadastrar (Enter)
             </Button>
-            <Button colorScheme="red">Cancelar</Button>
+            <Button
+              colorScheme="red"
+              onClick={() => {
+                onCloseCreateCustomerModal?.()
+              }}
+            >
+              Cancelar (Esc)
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

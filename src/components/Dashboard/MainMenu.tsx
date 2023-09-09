@@ -1,24 +1,6 @@
 import { Button, Heading, Stack } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
 import { CreateCustomer } from '../Customers/CreateCustomer'
 export function MainMenu() {
-  const [isCreateCustomerModalOpen, setIsCreateCustomerModalOpen] =
-    useState(false)
-
-  useEffect(() => {
-    // on press F5 setIsCreateCustomerModalOpen(true)
-    document.addEventListener('keydown', (event) => {
-      if (event.key === 'F5') {
-        event.preventDefault()
-        setIsCreateCustomerModalOpen(true)
-      }
-    })
-  }, [])
-
-  function onClose() {
-    setIsCreateCustomerModalOpen(false)
-  }
-
   return (
     <>
       <Stack
